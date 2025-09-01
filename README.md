@@ -22,9 +22,13 @@ The system:
 ## 📂 Project Structure
 
 youtube-subtitle-rag/
+
 ├── main.py # Entry point to run the app
+
 ├── trial.py # Subtitle extraction utilities
+
 ├── langchain_helper.py # VectorDB creation using FAISS
+
 ├── README.md # Project documentation
 
 ## 📦 Dependencies
