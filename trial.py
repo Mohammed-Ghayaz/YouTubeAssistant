@@ -21,14 +21,18 @@ def get_subtitle_url(url):
         elif "en" in auto_subs:
             response = auto_subs["en"]
 
-    subtitle_url = [r['url'] for r in response if r['ext'] == 'srt']
+    if response:
+        subtitle_url = [r['url'] for r in response if r['ext'] == 'srt']
     
-    return subtitle_url[0]
+    return subtitle_url[0] if subtitle_url else None
 
 def get_subtitles(subtitle_url):
     # Fetch subtitle file
-    r = requests.get(subtitle_url)
-    srt_data = r.text
+    if subtitle_url
+        r = requests.get(subtitle_url)
+        srt_data = r.text
+
+    srt_data = "No subtitles available"
 
     # Clean: remove timestamps and numbers from SRT
     def clean_srt(srt_text):
