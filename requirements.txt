@@ -1,5 +1,6 @@
 langchain
 langchain-community
+langchain-google-genai
 yt_dlp
 faiss-cpu
 google-generativeai
