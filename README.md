@@ -71,7 +71,7 @@ The video mainly discusses RAG pipelines, embeddings, and how to use LangChain w
 
 ## 📜 License
 
-MIT License © 2025 Z Mohammed Ghayaz  
+MIT License © 2025 Z Mohammed Ghayaz
 
 ---
 
