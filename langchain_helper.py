@@ -1,5 +1,5 @@
 from langchain_community.document_loaders import YoutubeLoader
-from trial import get_subtitle_url, get_subtitles
+from trial import get_subtitles
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
@@ -14,8 +14,7 @@ load_dotenv()
 
 def create_vectordb(url: str) -> FAISS:
     embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
-    subtitle_url = get_subtitle_url(url)
-    transcript = get_subtitles(subtitle_url)
+    transcript = get_subtitles(url)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks = text_splitter.split_text(transcript)
     docs = [Document(page_content=chunk, metadata={"source": url}) for chunk in chunks]
