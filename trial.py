@@ -28,7 +28,7 @@ def get_subtitle_url(url):
 
 def get_subtitles(subtitle_url):
     # Fetch subtitle file
-    if subtitle_url
+    if subtitle_url:
         r = requests.get(subtitle_url)
         srt_data = r.text
 
