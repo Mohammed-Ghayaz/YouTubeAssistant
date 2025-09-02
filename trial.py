@@ -2,12 +2,16 @@ import yt_dlp
 import requests
 import re
 
-def get_subtitle_url(url):
+def get_subtitle_url(url, lang="en"):
+    """
+    Extracts subtitle URL (SRT) for a given YouTube video.
+    Does not use ffmpeg.
+    """
     ydl_opts = {
         "writesubtitles": True,
         "writeautomaticsub": True,
-        "subtitleslangs": ["en"],   # pick language code
-        "skip_download": True
+        "subtitleslangs": [lang],   # Choose language
+        "skip_download": True,
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -16,25 +20,29 @@ def get_subtitle_url(url):
         subtitles = info.get("subtitles", {})
         auto_subs = info.get("automatic_captions", {})
 
-        if "en" in subtitles:
-            response = subtitles["en"]
-        elif "en" in auto_subs:
-            response = auto_subs["en"]
+        response = None
+        if lang in subtitles:
+            response = subtitles[lang]
+        elif lang in auto_subs:
+            response = auto_subs[lang]
 
-    if response:
-        subtitle_url = [r['url'] for r in response if r['ext'] == 'srt']
-    
-    return subtitle_url[0] if subtitle_url else None
+        if response:
+            subtitle_url = [r['url'] for r in response if r['ext'] == 'srt']
+            return subtitle_url[0] if subtitle_url else None
+
+    return None
+
 
 def get_subtitles(subtitle_url):
-    # Fetch subtitle file
-    if subtitle_url:
-        r = requests.get(subtitle_url)
-        srt_data = r.text
+    """
+    Downloads and cleans SRT subtitles from a given subtitle URL.
+    """
+    if not subtitle_url:
+        return "No subtitles available"
 
-    srt_data = "No subtitles available"
+    r = requests.get(subtitle_url)
+    srt_data = r.text
 
-    # Clean: remove timestamps and numbers from SRT
     def clean_srt(srt_text):
         cleaned = []
         for line in srt_text.splitlines():
@@ -43,12 +51,10 @@ def get_subtitles(subtitle_url):
                 continue
             if re.match(r'^\d\d:\d\d:\d\d,\d\d\d', line):  
                 continue
-            if line.strip() == "":
+            if not line.strip():
                 continue
             cleaned.append(line.strip())
         return " ".join(cleaned)
 
-    transcript = clean_srt(srt_data)
-    return transcript
-
+    return clean_srt(srt_data)
 
