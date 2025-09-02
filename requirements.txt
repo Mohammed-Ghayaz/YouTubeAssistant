@@ -5,3 +5,4 @@ yt_dlp
 faiss-cpu
 google-generativeai
 tiktoken
+youtube-transcript-api
