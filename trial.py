@@ -39,7 +39,7 @@ def get_subtitles(video_url: str, lang: str = "en"):
         except requests.exceptions.RequestException:
             return None
 
-    return None
+    return "Subtitles not found"
 
 
 # Example usage
