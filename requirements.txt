@@ -4,5 +4,6 @@ langchain-google-genai
 yt_dlp
 faiss-cpu
 google-generativeai
+ffmpeg
 tiktoken
 youtube-transcript-api
