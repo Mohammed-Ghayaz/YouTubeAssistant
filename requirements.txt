@@ -1,0 +1,6 @@
+langchain
+langchain-community
+yt_dlp
+faiss-cpu
+google-generativeai
+tiktoken
