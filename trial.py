@@ -1,60 +1,52 @@
 import yt_dlp
-import requests
-import re
 
-def get_subtitle_url(url, lang="en"):
-    """
-    Extracts subtitle URL (SRT) for a given YouTube video.
-    Does not use ffmpeg.
-    """
+def get_subtitles(video_url: str, lang: str = "en"):
     ydl_opts = {
         "writesubtitles": True,
         "writeautomaticsub": True,
-        "subtitleslangs": [lang],   # Choose language
+        "subtitleslangs": [lang],
+        "subtitlesformat": "srt",   # ✅ get SRT directly, no ffmpeg
         "skip_download": True,
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
+        info_dict = ydl.extract_info(video_url, download=False)
+        subs = info_dict.get("subtitles", {}) or info_dict.get("automatic_captions", {})
 
-        subtitles = info.get("subtitles", {})
-        auto_subs = info.get("automatic_captions", {})
+        if not subs:
+            return None
 
-        response = None
-        if lang in subtitles:
-            response = subtitles[lang]
-        elif lang in auto_subs:
-            response = auto_subs[lang]
+        # Prefer SRT
+        lang_subs = subs.get(lang, [])
+        srt_url = None
+        for sub in lang_subs:
+            if sub.get("ext") == "srt":
+                srt_url = sub["url"]
+                break
 
-        if response:
-            subtitle_url = [r['url'] for r in response if r['ext'] == 'srt']
-            return subtitle_url[0] if subtitle_url else None
+        if not srt_url and lang_subs:  # fallback: take first available
+            srt_url = lang_subs[0]["url"]
+
+        if not srt_url:
+            return None
+
+        # ✅ fetch subtitle file with timeout (to avoid 504 in Streamlit)
+        import requests
+        try:
+            r = requests.get(srt_url, timeout=10)
+            if r.status_code == 200:
+                return r.text
+        except requests.exceptions.RequestException:
+            return None
 
     return None
 
 
-def get_subtitles(subtitle_url):
-    """
-    Downloads and cleans SRT subtitles from a given subtitle URL.
-    """
-    if not subtitle_url:
-        return "No subtitles available"
-
-    r = requests.get(subtitle_url)
-    srt_data = r.text
-
-    def clean_srt(srt_text):
-        cleaned = []
-        for line in srt_text.splitlines():
-            # Skip subtitle indices and timestamps
-            if re.match(r'^\d+$', line):  
-                continue
-            if re.match(r'^\d\d:\d\d:\d\d,\d\d\d', line):  
-                continue
-            if not line.strip():
-                continue
-            cleaned.append(line.strip())
-        return " ".join(cleaned)
-
-    return clean_srt(srt_data)
-
+# Example usage
+if __name__ == "__main__":
+    url = "https://www.youtube.com/watch?v=MFSFcPsMsuE"
+    srt_text = get_subtitles(url, "en")
+    if srt_text:
+        print(srt_text[:1000])  # print first part
+    else:
+        print("No subtitles found")
